@@ -11,7 +11,7 @@ Your goal is to:
 - Evaluate what your system gets right and wrong
 - Reflect on how this mirrors real world AI recommenders
 
-Replace this paragraph with your own summary of what your version does.
+**VibeMatch 1.0** is a content-based recommender that runs in the terminal. It loads an 18-song catalog from `data/songs.csv`, scores every song against a taste profile (favorite genre, favorite mood, target energy, acoustic preference, and optionally mood tags, popularity, decade, instrumental feel and language), and prints the top 5 with the reasons for each score. It also has three switchable ranking modes, a diversity penalty that avoids repeating artists and genres, and an ASCII summary table. Run it with `python -m src.main` (add `--mode`, `--diversity` or `--table`).
 
 ---
 
@@ -177,7 +177,7 @@ Profile: genre=pop, mood=happy, energy=0.80, likes_acoustic=False
 
 Sunrise City wins because it matches on genre, mood and energy. Gym Hero beats Rooftop Lights only because "pop" is an exact genre match while "indie pop" is not, which is the genre-over-mood bias noted above.
 
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or demo video link here -->
+**Screenshot or video** *(optional)*: not included. The terminal output above is the demo.
 
 ---
 
@@ -567,15 +567,13 @@ I doubled the importance of energy and halved genre, keeping mood and acoustic t
 
 ## Limitations and Risks
 
-Summarize some limitations of your recommender.
+- **Labels beat the request.** Genre and mood are exact matches worth up to 3 points, while energy is worth at most 1.5. A user who asked for energy 0.95 can still get the calmest song in the catalog at number one.
+- **Tiny, made-up catalog.** 18 songs, and apart from lofi (3) and pop (2) every genre has one song, so many requests have only one real candidate.
+- **Exact-match labels.** "indie pop" is not "pop", and "aggressive" is not "intense", so close matches get no credit. That is why Gym Hero can outrank Rooftop Lights for a happy pop fan.
+- **One taste per profile**, and no `valence` in the core score, so dark and upbeat songs at the same energy look alike.
+- **No "nothing fits" warning.** A profile with no good match still gets a confident-looking top 5.
 
-Examples:
-
-- It only works on a tiny catalog
-- It does not understand lyrics or language
-- It might over favor one genre or mood
-
-You will go deeper on this in your model card.
+See [model_card.md](model_card.md) for the full evaluation and bias discussion.
 
 ---
 
@@ -585,10 +583,6 @@ Read and complete `model_card.md`:
 
 [**Model Card**](model_card.md)
 
-Write 1 to 2 paragraphs here about what you learned:
+A recommender turns data into predictions by choosing what to count and how much each thing is worth. Mine is four simple rules plus a few optional ones, yet the "Because: genre match, energy close..." reasons make the list feel smart. Changing one weight (halving genre, doubling energy) reordered the results, so the weights are really the system's opinions about taste.
 
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
-
-
-
+Bias can show up wherever those choices are hidden. Here it came from exact-match labels, a catalog where most genres have one song, and weights that let labels overrule an explicit energy request. In a real app the same pattern could quietly favor popular genres or well-covered users. The adversarial test profiles were what exposed this, since the normal profiles all looked fine. A more personal reflection is in the model card.
